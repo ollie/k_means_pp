@@ -15,5 +15,7 @@ RSpec.describe 'Superman' do
     clusters.each do |cluster|
       expect(cluster.points.size).to be > 0
     end
+
+    expect(clusters.first.to_s.size).to be > 1_000
   end
 end

@@ -53,38 +53,23 @@ data = [
 
 points   = data.map { |i| KMeansPP::Point.new(i[0], i[1]) }
 clusters = KMeansPP.clusters(points, 3)
-pp clusters
-# [#<KMeansPP::Cluster:0x007f8024103640
-#   @centroid=
-#    #<KMeansPP::Point:0x007f8024106ac0
-#     @group=0,
-#     @x=9.300774999999998,
-#     @y=7.586824999999999>,
-#   @points=
-#    [#<KMeansPP::Point:0x007f8024106e30 @group=0, @x=9.3348, @y=6.7843>,
-#     #<KMeansPP::Point:0x007f8024106e08 @group=0, @x=9.2882, @y=8.1347>,
-#     #<KMeansPP::Point:0x007f8024106ca0 @group=0, @x=9.382, @y=7.679>,
-#     #<KMeansPP::Point:0x007f8024106c50 @group=0, @x=9.1981, @y=7.7493>]>,
-#  #<KMeansPP::Cluster:0x007f80241035f0
-#   @centroid=
-#    #<KMeansPP::Point:0x007f8024105c10
-#     @group=1,
-#     @x=1.8833,
-#     @y=3.7408333333333332>,
-#   @points=
-#    [#<KMeansPP::Point:0x007f8024106e80 @group=1, @x=0.3968, @y=1.9431>,
-#     #<KMeansPP::Point:0x007f8024106d40 @group=1, @x=3.4434, @y=4.191>,
-#     #<KMeansPP::Point:0x007f8024106d18 @group=1, @x=1.8097, @y=5.0884>]>,
-#  #<KMeansPP::Cluster:0x007f8024103578
-#   @centroid=
-#    #<KMeansPP::Point:0x007f8024104900
-#     @group=2,
-#     @x=7.785266666666668,
-#     @y=2.5432666666666663>,
-#   @points=
-#    [#<KMeansPP::Point:0x007f8024106d90 @group=2, @x=7.6768, @y=2.7362>,
-#     #<KMeansPP::Point:0x007f8024106cf0 @group=2, @x=7.0698, @y=3.9285>,
-#     #<KMeansPP::Point:0x007f8024106c78 @group=2, @x=8.6092, @y=0.9651>]>]
+puts clusters
+# Cluster (9.300774999999998, 7.586824999999999): [
+#   (9.3348, 6.7843),
+#   (9.2882, 8.1347),
+#   (9.382, 7.679),
+#   (9.1981, 7.7493),
+# ]
+# Cluster (1.8833, 3.7408333333333332): [
+#   (0.3968, 1.9431),
+#   (3.4434, 4.191),
+#   (1.8097, 5.0884),
+# ]
+# Cluster (7.785266666666668, 2.5432666666666663): [
+#   (7.6768, 2.7362),
+#   (7.0698, 3.9285),
+#   (8.6092, 0.9651),
+# ]
 ```
 
 ## Running examples

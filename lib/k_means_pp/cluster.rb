@@ -19,5 +19,14 @@ class KMeansPP
       self.centroid = centroid
       self.points   = points
     end
+
+    # A string representation of the cluster.
+    def to_s
+      o = ''
+      o << "Cluster #{ centroid }: [\n"
+      points.each { |p| o << "  #{ p },\n" }
+      o << "]\n"
+      o
+    end
   end
 end

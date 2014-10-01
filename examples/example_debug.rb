@@ -2,6 +2,7 @@ $LOAD_PATH.unshift('../lib')
 
 require 'bundler/setup'
 require 'k_means_pp'
+# require './common'
 require 'ruby-prof'
 
 # Generate an array of random n points around origin.
@@ -21,22 +22,26 @@ def generate_points(n, radius)
   end
 end
 
+clusters = nil
+
 result = RubyProf.profile do
-  points   = generate_points(10, 3)
+  points   = generate_points(30_000, 10)
   clusters = KMeansPP.clusters(points, 7)
 end
 
 printer = RubyProf::FlatPrinter.new(result)
-printer.print(File.open('report-flat.txt', 'w'))
+printer.print(File.open('report-flat.txt', 'w'), min_percent: 2)
 
 printer = RubyProf::GraphPrinter.new(result)
-printer.print(File.open('report-graph.txt', 'w'))
+printer.print(File.open('report-graph.txt', 'w'), min_percent: 2)
 
 printer = RubyProf::GraphHtmlPrinter.new(result)
-printer.print(File.open('report-graph.html', 'w'))
+printer.print(File.open('report-graph.html', 'w'), min_percent: 2)
 
 printer = RubyProf::DotPrinter.new(result)
-printer.print(File.open('report-dot.dot', 'w'))
+printer.print(File.open('report-dot.dot', 'w'), min_percent: 2)
 
 # Then run:
 # dot -Tpng report-dot.dot > report-graph.png
+
+# plot(clusters)

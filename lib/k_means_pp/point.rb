@@ -38,5 +38,10 @@ class KMeansPP
       squared_distance = distance_x**2 + distance_y**2
       squared_distance
     end
+
+    # A string representation of the point.
+    def to_s
+      "(#{ x }, #{ y })"
+    end
   end
 end
