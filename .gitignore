@@ -1,4 +1,5 @@
 /*.gem
+/examples/report-*.*
 /.bundle/
 /.yardoc
 /Gemfile.lock
