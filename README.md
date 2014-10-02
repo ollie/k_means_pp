@@ -129,8 +129,10 @@ Don't forget to add the `--with-x` flag otherwise it won't show anything.
     $ gem install gnuplot
     $ cd examples
     $ ruby example_simple.rb
+    $ ruby example_block.rb
     $ ruby example_csv.rb
     $ ruby example_huge.rb
+    $ ruby example_debug.rb # Generates profiler reports
 
 ## Installation
 
