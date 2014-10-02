@@ -17,7 +17,6 @@ RSpec.describe 'Superman' do
     end
 
     expect(clusters.size).to eq(3)
-    expect(clusters.map { |c| c.centroid.group }).to eq([0, 1, 2])
   end
 
   it 'array of arrays' do

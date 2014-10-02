@@ -1,9 +1,9 @@
 class KMeansPP
-  # Cluster has a centroid (Point) and a group of related points (Points).
+  # Cluster has a centroid and a group of related points.
   class Cluster
     # Center of the data set ("centroid").
     #
-    # @return [Point]
+    # @return [Centroid]
     attr_accessor :centroid
 
     # Points in this cluster.
@@ -13,7 +13,7 @@ class KMeansPP
 
     # Create a new cluster with a centroid and points.
     #
-    # @param centroid [Point]        Center point of the data set.
+    # @param centroid [Centroid]     Center point of the data set.
     # @param points   [Array<Point>] Points in this cluster.
     def initialize(centroid, points = [])
       self.centroid = centroid

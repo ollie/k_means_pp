@@ -11,7 +11,7 @@ class KMeansPP
 
   # Centroid points
   #
-  # @return [Array<Point>]
+  # @return [Array<Centroid>]
   attr_accessor :centroids
 
   # Take an array of things and group them into K clusters.
@@ -34,59 +34,69 @@ class KMeansPP
     instance = new(points, clusters_count, &block)
     instance.group_points
     instance.centroids.map do |centroid|
-      cluster_points = points.select { |p| p.group == centroid.group }
-
-      if block
-        cluster_points.map!(&:original)
-      else
-        cluster_points.map! { |p| [p.x, p.y] }
-      end
-
-      Cluster.new(centroid, cluster_points)
+      cluster_for_centroid(centroid, points, &block)
     end
   end
 
-  # Index (group number) of the nearest centroid.
+  # Computed points are a flat structure so this nests each point
+  # in an array.
   #
-  # @param point     [Point]        Measure distance of this point
-  # @param centroids [Array<Point>] to those cluster centers
+  # @param centroid [Centroid] Centroid of the cluster.
   #
-  # @return [Fixnum]
-  def self.nearest_centroid_index(point, centroids)
-    nearest_centroid(point, centroids)[0]
+  # @return [Cluster]
+  def self.cluster_for_centroid(centroid, points, &block)
+    cluster_points = points.select { |p| p.group == centroid }
+
+    if block
+      cluster_points.map!(&:original)
+    else
+      cluster_points.map! { |p| [p.x, p.y] }
+    end
+
+    Cluster.new(centroid, cluster_points)
   end
 
-  # Distance of the nearest centroid.
+  # Find nearest centroid for a given point in given centroids.
   #
-  # @param point     [Point]        Measure distance of this point
-  # @param centroids [Array<Point>] to those cluster centers
+  # @param point     [Point]           Measure distance of this point
+  # @param centroids [Array<Centroid>] to those cluster centers
+  #
+  # @return [Centroid]
+  def self.find_nearest_centroid(point, centroids)
+    find_nearest_centroid_and_distance(point, centroids)[0]
+  end
+
+  # Find distance to the nearest centroid for a given point in given centroids.
+  #
+  # @param point     [Point]           Measure distance of this point
+  # @param centroids [Array<Centroid>] to those cluster centers
   #
   # @return [Float]
-  def self.nearest_centroid_distance(point, centroids)
-    nearest_centroid(point, centroids)[1]
+  def self.find_nearest_centroid_distance(point, centroids)
+    find_nearest_centroid_and_distance(point, centroids)[1]
   end
 
-  # Find the nearest centroid.
+  # Find the nearest centroid in given centroids.
   #
-  # @param point     [Point]        Measure distance of this point
-  # @param centroids [Array<Point>] to those cluster centers
+  # @param point     [Point]           Measure distance of this point
+  # @param centroids [Array<Centroid>] to those cluster centers
   #
   # @return [Array]
-  def self.nearest_centroid(point, centroids)
+  def self.find_nearest_centroid_and_distance(point, centroids)
     # Assume the current centroid is the closest.
-    nearest_index    = point.group
+    nearest_centroid = point.group
     nearest_distance = Float::INFINITY
 
-    centroids.each_with_index do |centroid, centroid_i|
+    centroids.each do |centroid|
       distance = centroid.squared_distance_to(point)
 
       next if distance >= nearest_distance
 
       nearest_distance = distance
-      nearest_index    = centroid_i
+      nearest_centroid = centroid
     end
 
-    [nearest_index, nearest_distance]
+    [nearest_centroid, nearest_distance]
   end
 
   # Take an array of things and group them into K clusters.
@@ -117,14 +127,13 @@ class KMeansPP
     end
 
     self.points    = points
-    self.centroids = clusters_count.times.map { Point.new }
+    self.centroids = Array.new(clusters_count)
   end
 
   # Group points into clusters.
   def group_points
     define_initial_clusters
     fine_tune_clusters
-    cleanup
   end
 
   protected
@@ -135,7 +144,7 @@ class KMeansPP
   # forming cells.
   def define_initial_clusters
     # Randomly choose a point as the first centroid.
-    centroids[0] = points.sample.dup
+    centroids[0] = Centroid.new(points.sample)
 
     # Initialize an array of distances of every point.
     distances = points.size.times.map { 0.0 }
@@ -148,7 +157,7 @@ class KMeansPP
       distances_sum = 0.0
 
       points.each_with_index do |point, point_i|
-        distance = self.class.nearest_centroid_distance(
+        distance = self.class.find_nearest_centroid_distance(
           point,
           centroids[0...centroid_i]
         )
@@ -164,14 +173,14 @@ class KMeansPP
       distances.each_with_index do |distance, point_i|
         distances_sum -= distance
         next if distances_sum > 0
-        centroids[centroid_i] = points[point_i].dup
+        centroids[centroid_i] = Centroid.new(points[point_i])
         break
       end
     end
 
     # Assign each point its nearest centroid.
     points.each do |point|
-      point.group = self.class.nearest_centroid_index(point, centroids)
+      point.group = self.class.find_nearest_centroid(point, centroids)
     end
   end
 
@@ -200,25 +209,16 @@ class KMeansPP
   # This is done by averaging X and Y coordinates.
   def calculate_new_centroids
     # Clear centroids.
-    centroids.each do |centroid|
-      centroid.x     = 0
-      centroid.y     = 0
-      centroid.group = 0 # Used as a counter for averaging
-    end
+    centroids.each(&:reset)
 
     # Sum all X and Y coords into each point's centroid.
     points.each do |point|
-      centroid        = centroids[point.group]
-      centroid.group += 1 # Incremet counter
-      centroid.x     += point.x
-      centroid.y     += point.y
+      centroid = point.group
+      centroid.add(point)
     end
 
     # And then average it to find a center.
-    centroids.each do |centroid|
-      centroid.x /= centroid.group
-      centroid.y /= centroid.group
-    end
+    centroids.each(&:average)
   end
 
   # Loop through all the points and find their nearest centroid.
@@ -229,19 +229,12 @@ class KMeansPP
     changed = 0
 
     points.each do |point|
-      centroid_i = self.class.nearest_centroid_index(point, centroids)
-      next if centroid_i == point.group
+      centroid = self.class.find_nearest_centroid(point, centroids)
+      next if centroid == point.group
       changed += 1
-      point.group = centroid_i
+      point.group = centroid
     end
 
     changed
-  end
-
-  # Since we used group attribute as a counter, we need to re-assign it.
-  def cleanup
-    centroids.each_with_index do |centroid, i|
-      centroid.group = i
-    end
   end
 end
