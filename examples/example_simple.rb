@@ -23,4 +23,6 @@ plot clusters
 puts clusters
 
 cluster = clusters.first
-p cluster.centroid
+p cluster.centroid.x
+p cluster.centroid.y
+p cluster.points
