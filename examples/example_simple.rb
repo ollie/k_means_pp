@@ -18,5 +18,9 @@ points = [
 ]
 
 clusters = KMeansPP.clusters(points, 3)
-plot(clusters)
+
+plot clusters
 puts clusters
+
+cluster = clusters.first
+p cluster.centroid

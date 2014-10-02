@@ -9,14 +9,15 @@ RSpec.describe 'Superman' do
 
     clusters = KMeansPP.clusters(data, 3)
 
-    expect(clusters.size).to eq(3)
-    expect(clusters.map { |c| c.centroid.group }).to eq([0, 1, 2])
-
     clusters.each do |cluster|
       expect(cluster.points.size).to be > 0
+      expect(cluster.centroid.x).to_not eq(0)
+      expect(cluster.centroid.y).to_not eq(0)
+      expect(cluster.to_s).to_not be_empty
     end
 
-    expect(clusters.first.to_s.size).to be > 1_000
+    expect(clusters.size).to eq(3)
+    expect(clusters.map { |c| c.centroid.group }).to eq([0, 1, 2])
   end
 
   it 'array of arrays' do
@@ -35,6 +36,7 @@ RSpec.describe 'Superman' do
 
     clusters = KMeansPP.clusters(data, 3)
     expect(clusters.size).to eq(3)
+    expect(clusters.first.points.first).to be_a(Array)
   end
 
   it 'array of anything else with block' do
@@ -54,6 +56,8 @@ RSpec.describe 'Superman' do
     clusters = KMeansPP.clusters(data, 3) do |point|
       [point[:x], point[:y]]
     end
+
     expect(clusters.size).to eq(3)
+    expect(clusters.first.points.first).to be_a(Hash)
   end
 end

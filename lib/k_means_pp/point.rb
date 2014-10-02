@@ -16,6 +16,11 @@ class KMeansPP
     # @return [Fixnum]
     attr_accessor :group
 
+    # The original object (could be anything from Hash to an Object).
+    #
+    # @return [Object]
+    attr_accessor :original
+
     # Create a new point (data set point or a centroid).
     #
     # @param x     [Float]  X coordinate of the point.

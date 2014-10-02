@@ -23,4 +23,5 @@ end
 
 points   = generate_points(30_000, 10)
 clusters = KMeansPP.clusters(points, 7)
-plot(clusters)
+
+plot clusters

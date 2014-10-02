@@ -11,8 +11,8 @@ def plot(clusters)
       # Plot each cluster's points
       clusters.each do |cluster|
         # Collect all x and y coords for this cluster
-        x = cluster.points.map(&:x)
-        y = cluster.points.map(&:y)
+        x = cluster.points.map { |p| p[0] }
+        y = cluster.points.map { |p| p[1] }
 
         # Plot w/o a title (clutters things up)
         plot.data << Gnuplot::DataSet.new([x, y]) do |ds|

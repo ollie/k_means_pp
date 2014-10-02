@@ -10,5 +10,6 @@ points = CSV.foreach('points.csv').map do |row|
 end
 
 clusters = KMeansPP.clusters(points, 3)
-plot(clusters)
+
+plot clusters
 puts clusters

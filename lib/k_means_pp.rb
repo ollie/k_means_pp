@@ -14,12 +14,16 @@ class KMeansPP
   # @return [Array<Point>]
   attr_accessor :centroids
 
-  # Take an array of things as an argument and group them into K clusters.
-  # By default array of arrays is is expected, but you can pass in an array
-  # of anything.
+  # Take an array of things and group them into K clusters.
   #
-  # In which case you should also pass in a block which that does a
-  # per-item translation to array of two numbers.
+  # If no block was given, an array of arrays (of two numbers) is expected.
+  # At the end an array of +Cluster+s is returned, each wrapping
+  # an array or arrays (of two numbers).
+  #
+  # If a block was given, the +points+ is likely an array of other things
+  # like hashes or objects. The block is expected to return an array of two
+  # numbers. At the end an array of +Cluster+s is returned, each wrapping
+  # an array or original objects.
   #
   # @param points         [Array]  Source data set of points.
   # @param clusters_count [Fixnum] Number of clusters ("k").
@@ -31,6 +35,13 @@ class KMeansPP
     instance.group_points
     instance.centroids.map do |centroid|
       cluster_points = points.select { |p| p.group == centroid.group }
+
+      if block
+        cluster_points.map!(&:original)
+      else
+        cluster_points.map! { |p| [p.x, p.y] }
+      end
+
       Cluster.new(centroid, cluster_points)
     end
   end
@@ -62,30 +73,47 @@ class KMeansPP
   #
   # @return [Array]
   def self.nearest_centroid(point, centroids)
-    min_index = point.group
-    min_dist  = Float::INFINITY
+    # Assume the current centroid is the closest.
+    nearest_index    = point.group
+    nearest_distance = Float::INFINITY
 
-    centroids.each_with_index do |centroid, i|
-      d = centroid.squared_distance_to(point)
+    centroids.each_with_index do |centroid, centroid_i|
+      distance = centroid.squared_distance_to(point)
 
-      next if min_dist <= d
+      next if distance >= nearest_distance
 
-      min_dist  = d
-      min_index = i
+      nearest_distance = distance
+      nearest_index    = centroid_i
     end
 
-    [min_index, min_dist]
+    [nearest_index, nearest_distance]
   end
 
-  # Take an array of points as an argument and group them into K clusters.
+  # Take an array of things and group them into K clusters.
+  #
+  # If no block was given, an array of arrays (of two numbers) is expected.
+  # Internally we map them with +Point+ objects.
+  #
+  # If a block was given, the +points+ is likely an array of other things
+  # like hashes or objects. In this case we will keep the original object
+  # in a property and once we are done, we will swap those objects.
+  # The block is expected to retun an array of two numbers.
   #
   # @param points         [Array]  Source data set of points.
   # @param clusters_count [Fixnum] Number of clusters ("k").
   # @yieldreturn [Array<Numeric>]
   def initialize(points, clusters_count)
-    points.map! do |point|
-      point = yield(point) if block_given?
-      Point.new(point[0], point[1])
+    if block_given?
+      points.map! do |point_obj|
+        point_ary      = yield(point_obj)
+        point          = Point.new(point_ary[0], point_ary[1])
+        point.original = point_obj
+        point
+      end
+    else
+      points.map! do |point_ary|
+        Point.new(point_ary[0], point_ary[1])
+      end
     end
 
     self.points    = points
