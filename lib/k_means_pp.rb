@@ -10,11 +10,6 @@ class KMeansPP
   # @return [Array<Point>]
   attr_accessor :points
 
-  # Number of clusters ("k").
-  #
-  # @return [Fixnum]
-  attr_accessor :clusters_count
-
   # Centroid points
   #
   # @return [Array<Point>]
@@ -68,10 +63,10 @@ class KMeansPP
     centroids.each_with_index do |centroid, i|
       d = centroid.squared_distance_to(point)
 
-      if min_dist > d
-        min_dist  = d
-        min_index = i
-      end
+      next if min_dist <= d
+
+      min_dist  = d
+      min_index = i
     end
 
     [min_index, min_dist]
@@ -82,93 +77,132 @@ class KMeansPP
   # @param points         [Array<Point>] Source data set of points.
   # @param clusters_count [Fixnum]       Number of clusters ("k").
   def initialize(points, clusters_count)
-    self.points         = points
-    self.clusters_count = clusters_count
-  end
-
-  # Run Lloyd's algorithm and k-means++ algorithm.
-  def group_points
-    lloyd_algorithm
-  end
-
-  # This is Lloyd's algorithm
-  # https://en.wikipedia.org/wiki/Lloyd%27s_algorithm
-  def lloyd_algorithm
+    self.points    = points
     self.centroids = clusters_count.times.map { Point.new }
-
-    k_means_plus_plus
-
-    lenpts10 = points.size >> 10
-
-    loop do
-      # group element for centroids are used as counters
-      centroids.each do |centroid|
-        centroid.x     = 0
-        centroid.y     = 0
-        centroid.group = 0
-      end
-
-      points.each do |p|
-        centroids[p.group].group += 1
-        centroids[p.group].x     += p.x
-        centroids[p.group].y     += p.y
-      end
-
-      centroids.each do |centroid|
-        centroid.x /= centroid.group
-        centroid.y /= centroid.group
-      end
-
-      # find closest centroid of each Point
-      changed = 0
-
-      points.each do |p|
-        min_i = self.class.nearest_centroid_index(p, centroids)
-        if min_i != p.group
-          changed += 1
-          p.group = min_i
-        end
-      end
-
-      # stop when 99.9% of points are good
-      break if changed <= lenpts10
-    end
-
-    centroids.each_with_index do |centroid, i|
-      centroid.group = i
-    end
   end
+
+  # Group points into clusters.
+  def group_points
+    define_initial_clusters
+    fine_tune_clusters
+    cleanup
+  end
+
+  protected
 
   # K-means++ algorithm.
-  def k_means_plus_plus
+  #
+  # Find initial centroids and assign points to their nearest centroid,
+  # forming cells.
+  def define_initial_clusters
     # Randomly choose a point as the first centroid.
     centroids[0] = points.sample.dup
 
     # Initialize an array of distances of every point.
-    d = points.size.times.map { 0.0 }
+    distances = points.size.times.map { 0.0 }
 
-    centroids.each_with_index do |_, i|
+    centroids.each_with_index do |_, centroid_i|
       # Skip the first centroid as it's already picked but keep the index.
-      next if i == 0
+      next if centroid_i == 0
 
-      sum = 0
-      points.each_with_index do |p, j|
-        d[j] = self.class.nearest_centroid_distance(p, centroids[0...i])
-        sum += d[j]
+      # Sum points' distances to their nearest centroid
+      distances_sum = 0.0
+
+      points.each_with_index do |point, point_i|
+        distance = self.class.nearest_centroid_distance(
+          point,
+          centroids[0...centroid_i]
+        )
+        distances[point_i] = distance
+        distances_sum     += distance
       end
 
-      sum *= rand
+      # Randomly cut it.
+      distances_sum *= rand
 
-      d.each_with_index do |di, j|
-        sum -= di
-        next if sum > 0
-        centroids[i] = points[j].dup
+      # Keep subtracting those distances until we hit a zero (or lower)
+      # in which case we found a new centroid.
+      distances.each_with_index do |distance, point_i|
+        distances_sum -= distance
+        next if distances_sum > 0
+        centroids[centroid_i] = points[point_i].dup
         break
       end
     end
 
-    points.each do |p|
-      p.group = self.class.nearest_centroid_index(p, centroids)
+    # Assign each point its nearest centroid.
+    points.each do |point|
+      point.group = self.class.nearest_centroid_index(point, centroids)
+    end
+  end
+
+  # This is Lloyd's algorithm
+  # https://en.wikipedia.org/wiki/Lloyd%27s_algorithm
+  #
+  # At this point we have our points already assigned into cells.
+  #
+  # 1. We calculate a new center for each cell.
+  # 2. For each point find its nearest center and re-assign it if it changed.
+  # 3. Repeat until a threshold has been reached.
+  def fine_tune_clusters
+    # When a number of changed points reaches this number, we are done.
+    changed_threshold = points.size >> 10
+
+    loop do
+      calculate_new_centroids
+      changed = reassign_points
+
+      # Stop when 99.9% of points are good
+      break if changed <= changed_threshold
+    end
+  end
+
+  # For each cell calculate its center.
+  # This is done by averaging X and Y coordinates.
+  def calculate_new_centroids
+    # Clear centroids.
+    centroids.each do |centroid|
+      centroid.x     = 0
+      centroid.y     = 0
+      centroid.group = 0 # Used as a counter for averaging
+    end
+
+    # Sum all X and Y coords into each point's centroid.
+    points.each do |point|
+      centroid        = centroids[point.group]
+      centroid.group += 1 # Incremet counter
+      centroid.x     += point.x
+      centroid.y     += point.y
+    end
+
+    # And then average it to find a center.
+    centroids.each do |centroid|
+      centroid.x /= centroid.group
+      centroid.y /= centroid.group
+    end
+  end
+
+  # Loop through all the points and find their nearest centroid.
+  # If it's a different one than current, change it ande take a note.
+  #
+  # @return [Fixnum] Number of changed points.
+  def reassign_points
+    changed = 0
+
+    points.each do |point|
+      centroid_i = self.class.nearest_centroid_index(point, centroids)
+      next if centroid_i == point.group
+      changed += 1
+      point.group = centroid_i
+    end
+
+    changed
+  end
+
+  # Since we used group attribute as a counter, we need to re-assign it.
+  def cleanup
+    centroids.each_with_index do |centroid, i|
+      centroid.group = i
     end
   end
 end

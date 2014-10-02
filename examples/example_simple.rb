@@ -18,6 +18,5 @@ data = [
 ]
 
 points   = data.map { |i| KMeansPP::Point.new(i[0], i[1]) }
-clusters = KMeansPP.clusters(points, 3)
-#plot(clusters)
-puts clusters
+clusters = KMeansPP.clusters(points, 2)
+plot(clusters)

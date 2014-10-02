@@ -28,12 +28,11 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'simplecov', '~> 0.9'
 
   # Code style, debugging, docs
-  spec.add_development_dependency 'rubocop', '~> 0.26'
-  spec.add_development_dependency 'pry',     '~> 0.10'
-  spec.add_development_dependency 'yard',    '~> 0.8'
-  spec.add_development_dependency 'rake',    '~> 10.3'
-
-  # Debug
-  spec.add_development_dependency 'gnuplot',   '~> 2.6'
-  spec.add_development_dependency 'ruby-prof', '~> 0.15'
+  spec.add_development_dependency 'yard',       '~> 0.8'
+  spec.add_development_dependency 'rake',       '~> 10.3'
+  spec.add_development_dependency 'rubocop',    '~> 0.26'
+  spec.add_development_dependency 'pry',        '~> 0.10'
+  spec.add_development_dependency 'pry-byebug', '~> 2.0'
+  spec.add_development_dependency 'ruby-prof',  '~> 0.15'
+  spec.add_development_dependency 'gnuplot',    '~> 2.6'
 end
