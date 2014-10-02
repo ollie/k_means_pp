@@ -38,7 +38,7 @@ The code is a port of the Python version on [rosettacode.org][rosetta].
 See examples, too.
 
 ```ruby
-data = [
+points = [
   [0.3968, 1.9431],
   [9.3348, 6.7843],
   [9.2882, 8.1347],
@@ -51,24 +51,72 @@ data = [
   [9.1981, 7.7493]
 ]
 
-points   = data.map { |i| KMeansPP::Point.new(i[0], i[1]) }
 clusters = KMeansPP.clusters(points, 3)
+plot(clusters)
 puts clusters
-# Cluster (9.300774999999998, 7.586824999999999): [
+# Cluster (8.651271428571429, 5.4253): [
 #   (9.3348, 6.7843),
 #   (9.2882, 8.1347),
+#   (7.6768, 2.7362),
+#   (7.0698, 3.9285),
 #   (9.382, 7.679),
+#   (8.6092, 0.9651),
 #   (9.1981, 7.7493),
 # ]
-# Cluster (1.8833, 3.7408333333333332): [
+# Cluster (0.3968, 1.9431): [
 #   (0.3968, 1.9431),
+# ]
+# Cluster (2.62655, 4.6396999999999995): [
 #   (3.4434, 4.191),
 #   (1.8097, 5.0884),
 # ]
-# Cluster (7.785266666666668, 2.5432666666666663): [
+```
+
+Or with custom structure:
+
+```ruby
+class Point
+  attr_accessor :x, :y
+
+  def initialize(x, y)
+    self.x = x
+    self.y = y
+  end
+end
+
+points = [
+  Point.new(0.3968, 1.9431),
+  Point.new(9.3348, 6.7843),
+  Point.new(9.2882, 8.1347),
+  Point.new(7.6768, 2.7362),
+  Point.new(3.4434, 4.1910),
+  Point.new(1.8097, 5.0884),
+  Point.new(7.0698, 3.9285),
+  Point.new(9.3820, 7.6790),
+  Point.new(8.6092, 0.9651),
+  Point.new(9.1981, 7.7493)
+]
+
+clusters = KMeansPP.clusters(points, 3) do |point|
+  [point.x, point.y]
+end
+plot(clusters)
+puts clusters
+# Cluster (1.10325, 3.51575): [
+#   (0.3968, 1.9431),
+#   (1.8097, 5.0884),
+# ]
+# Cluster (8.651271428571429, 5.4253): [
+#   (9.3348, 6.7843),
+#   (9.2882, 8.1347),
 #   (7.6768, 2.7362),
 #   (7.0698, 3.9285),
+#   (9.382, 7.679),
 #   (8.6092, 0.9651),
+#   (9.1981, 7.7493),
+# ]
+# Cluster (3.4434, 4.191): [
+#   (3.4434, 4.191),
 # ]
 ```
 

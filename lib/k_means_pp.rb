@@ -2,8 +2,7 @@ require 'k_means_pp/version'
 require 'k_means_pp/point'
 require 'k_means_pp/cluster'
 
-# K-means++ is an algorithm for choosing the initial values (or "seeds") for the
-# k-means clustering algorithm.
+# Cluster data with the k-means++, k-means and Lloyd algorithm.
 class KMeansPP
   # Source data set of points.
   #
@@ -15,14 +14,20 @@ class KMeansPP
   # @return [Array<Point>]
   attr_accessor :centroids
 
-  # Take an array of points as an argument and group them into K clusters.
+  # Take an array of things as an argument and group them into K clusters.
+  # By default array of arrays is is expected, but you can pass in an array
+  # of anything.
   #
-  # @param points         [Array<Point>] Source data set of points.
-  # @param clusters_count [Fixnum]       Number of clusters ("k").
+  # In which case you should also pass in a block which that does a
+  # per-item translation to array of two numbers.
+  #
+  # @param points         [Array]  Source data set of points.
+  # @param clusters_count [Fixnum] Number of clusters ("k").
+  # @yieldreturn [Array<Numeric>]
   #
   # @return [Array<Cluster>]
-  def self.clusters(points, clusters_count)
-    instance = new(points, clusters_count)
+  def self.clusters(points, clusters_count, &block)
+    instance = new(points, clusters_count, &block)
     instance.group_points
     instance.centroids.map do |centroid|
       cluster_points = points.select { |p| p.group == centroid.group }
@@ -74,9 +79,15 @@ class KMeansPP
 
   # Take an array of points as an argument and group them into K clusters.
   #
-  # @param points         [Array<Point>] Source data set of points.
-  # @param clusters_count [Fixnum]       Number of clusters ("k").
+  # @param points         [Array]  Source data set of points.
+  # @param clusters_count [Fixnum] Number of clusters ("k").
+  # @yieldreturn [Array<Numeric>]
   def initialize(points, clusters_count)
+    points.map! do |point|
+      point = yield(point) if block_given?
+      Point.new(point[0], point[1])
+    end
+
     self.points    = points
     self.centroids = clusters_count.times.map { Point.new }
   end

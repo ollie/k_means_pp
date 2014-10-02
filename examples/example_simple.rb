@@ -4,7 +4,7 @@ require 'bundler/setup'
 require 'k_means_pp'
 require './common'
 
-data = [
+points = [
   [0.3968, 1.9431],
   [9.3348, 6.7843],
   [9.2882, 8.1347],
@@ -17,6 +17,6 @@ data = [
   [9.1981, 7.7493]
 ]
 
-points   = data.map { |i| KMeansPP::Point.new(i[0], i[1]) }
-clusters = KMeansPP.clusters(points, 2)
+clusters = KMeansPP.clusters(points, 3)
 plot(clusters)
+puts clusters

@@ -10,7 +10,7 @@ require 'ruby-prof'
 # @param n      [Fixnum] Number of points to generate.
 # @param radius [Fixnum] How far to go from origin.
 #
-# @return [Array<Point>]
+# @return [Array<Array>]
 def generate_points(n, radius)
   n.times.map do
     random_radius = rand * radius
@@ -18,15 +18,15 @@ def generate_points(n, radius)
     x             = random_radius * Math.cos(random_angle)
     y             = random_radius * Math.sin(random_angle)
 
-    KMeansPP::Point.new(x, y)
+    [x, y]
   end
 end
 
 clusters = nil
 
 result = RubyProf.profile do
-  points   = generate_points(30_000, 10)
-  clusters = KMeansPP.clusters(points, 7)
+  points   = generate_points(100, 10)
+  clusters = KMeansPP.clusters(points, 5)
 end
 
 printer = RubyProf::FlatPrinter.new(result)
