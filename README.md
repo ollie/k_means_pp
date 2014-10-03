@@ -136,7 +136,7 @@ Don't forget to add the `--with-x` flag otherwise it won't show anything.
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'k_means_pp', require: 'KMeansPP'
+gem 'k_means_pp'
 ```
 
 And then execute:
