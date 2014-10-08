@@ -2,7 +2,8 @@ require 'csv'
 
 RSpec.describe 'Superman' do
   it 'does it again' do
-    data = CSV.foreach('./spec/resources/points.csv').map do |row|
+    raw_data = File.read('./spec/resources/points.csv')
+    data     = CSV.parse(raw_data).map do |row|
       [row[0].to_f, row[1].to_f]
     end
 
