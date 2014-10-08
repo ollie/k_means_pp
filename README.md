@@ -1,5 +1,7 @@
 # KMeansPP
 
+[![Build Status](https://travis-ci.org/ollie/k_means_pp.svg?branch=master)](https://travis-ci.org/ollie/k_means_pp)
+
 ## What's this?
 
 This is a Ruby implementation of the k-means++ algorithm for data clustering.

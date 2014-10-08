@@ -1,6 +1,5 @@
 $LOAD_PATH.unshift('../lib')
 
-require 'bundler/setup'
 require 'k_means_pp'
 require './common'
 require 'csv'
