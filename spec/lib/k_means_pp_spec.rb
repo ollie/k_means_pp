@@ -1,4 +1,3 @@
-require 'spec_helper'
 require 'csv'
 
 RSpec.describe 'Superman' do
@@ -58,5 +57,18 @@ RSpec.describe 'Superman' do
 
     expect(clusters.size).to eq(3)
     expect(clusters.first.points.first).to be_a(Hash)
+  end
+
+  it 'does not mutate original structure' do
+    data = [
+      [0.3968, 1.9431],
+      [9.3348, 6.7843]
+    ]
+
+    backup   = data.dup
+    clusters = KMeansPP.clusters(data, 2)
+
+    expect(data).to eq(backup)
+    expect(clusters.size).to eq(2)
   end
 end

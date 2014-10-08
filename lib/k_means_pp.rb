@@ -34,7 +34,7 @@ class KMeansPP
     instance = new(points, clusters_count, &block)
     instance.group_points
     instance.centroids.map do |centroid|
-      cluster_for_centroid(centroid, points, &block)
+      cluster_for_centroid(centroid, instance.points, &block)
     end
   end
 
@@ -113,6 +113,9 @@ class KMeansPP
   # @param clusters_count [Fixnum] Number of clusters ("k").
   # @yieldreturn [Array<Numeric>]
   def initialize(points, clusters_count)
+    # Do not mutate original structure
+    points = points.dup
+
     if block_given?
       points.map! do |point_obj|
         point_ary      = yield(point_obj)
