@@ -1,5 +1,4 @@
-/*.gem
-/examples/report-*.*
+*.gem
 /.bundle/
 /.yardoc
 /Gemfile.lock
@@ -9,8 +8,4 @@
 /pkg/
 /spec/reports/
 /tmp/
-*.bundle
-*.so
-*.o
-*.a
-mkmf.log
+/examples/report-*.*
