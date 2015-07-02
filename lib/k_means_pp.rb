@@ -165,7 +165,7 @@ class KMeansPP
           centroids[0...centroid_i]
         )
         distances[point_i] = distance
-        distances_sum     += distance
+        distances_sum += distance
       end
 
       # Randomly cut it.

@@ -23,14 +23,14 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   # System
-  spec.add_development_dependency 'bundler', '~> 1.7'
+  spec.add_development_dependency 'bundler', '~> 1.10'
 
   # Test
-  spec.add_development_dependency 'rspec',     '~> 3.2'
+  spec.add_development_dependency 'rspec',     '~> 3.3'
   spec.add_development_dependency 'simplecov', '~> 0.10'
 
   # Code style, debugging, docs
-  spec.add_development_dependency 'rubocop',    '~> 0.31'
+  spec.add_development_dependency 'rubocop',    '~> 0.32'
   spec.add_development_dependency 'pry',        '~> 0.10'
   spec.add_development_dependency 'yard',       '~> 0.8'
   spec.add_development_dependency 'rake',       '~> 10.4'

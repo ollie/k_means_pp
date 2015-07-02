@@ -25,7 +25,7 @@ class KMeansPP
 
     # A string representation of the point.
     def to_s
-      "(#{ x }, #{ y })"
+      "(#{x}, #{y})"
     end
   end
 
@@ -80,8 +80,8 @@ class KMeansPP
     # @param point [Point]
     def add(point)
       self.counter += 1
-      self.x       += point.x
-      self.y       += point.y
+      self.x += point.x
+      self.y += point.y
     end
 
     # At this point X and Y properties will contain sums of all the point

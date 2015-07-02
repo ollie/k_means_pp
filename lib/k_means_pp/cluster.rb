@@ -23,8 +23,8 @@ class KMeansPP
     # A string representation of the cluster.
     def to_s
       o = ''
-      o << "Cluster #{ centroid }: [\n"
-      points.each { |p| o << "  #{ p },\n" }
+      o << "Cluster #{centroid}: [\n"
+      points.each { |p| o << "  #{p},\n" }
       o << "]\n"
       o
     end
